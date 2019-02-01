@@ -87,9 +87,9 @@ def solve(funcs, a, b, plot = False, plot_intervals = False, polish = False):
         zeros = subdivision_solve_nd(funcs,a,b,deg,interval_data,polish=polish)
 
         print("\rPercent Finished: 100%       ")
+        interval_data.print_results()
         #Plot what happened
         if plot and dim == 2:
-            interval_data.print_results()
             interval_data.plot_results(funcs, zeros, plot_intervals)
         return zeros
 
@@ -394,11 +394,11 @@ def good_zeros_nd(zeros, imag_tol = 1.e-5, real_tol = 1.e-5):
     good_zeros : numpy array
         The real zeros in [-1,1] of the input zeros.
     """
-    good_zeros = zeros[np.all(np.abs(zeros.imag) <= imag_tol,axis = 1)]
+    good_zeros = zeros[np.all(np.abs(zeros.imag) < imag_tol,axis = 1)]
     good_zeros = good_zeros[np.all(np.abs(good_zeros) <= 1 + real_tol,axis = 1)]
     return good_zeros.real
 
-def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=1.e-6, polish=False, good_degs=None):
+def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=1.e-8, polish=False, good_degs=None):
     """Finds the common zeros of the given functions.
 
     Parameters
@@ -431,7 +431,7 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
     cheb_approx_list = []
     interval_data.print_progress()
     dim = len(a)
-    good_degs = None
+
     if good_degs is None:
         good_degs = [None]*len(funcs)
 
@@ -473,6 +473,7 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
                     A[row,col] = 0
                 else:
                     A[row,col] = coeff[var_list[col]]
+
         #solve the system
         try:
             zero = np.linalg.solve(A,-B)
@@ -545,6 +546,7 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
             if isinstance(zeros, int):
                 divisor_var += 1
                 continue
+
             zeros = np.array(zeros)
             interval_data.track_interval("Division", [a,b])
             if len(zeros) == 0:
@@ -581,7 +583,7 @@ def good_direc(coeffs, dim, solve_tol):
     good_direc : bool
         If True running division should be stable. If False, probably not.
     """
-    tol = solve_tol*1000
+    tol = solve_tol*100
     slices = []
     for i in range(coeffs[0].ndim):
         if i == dim:
@@ -595,11 +597,11 @@ def good_direc(coeffs, dim, solve_tol):
 
     for num, val in enumerate(vals):
         deg = degs[num]
-        slices = tuple([num]+[slice(0,deg) for i in range(val.ndim)])
-        min_vals[slices] = val
+        slices = [num]+[slice(0,deg) for i in range(val.ndim)]
+        min_vals[tuple(slices)] = val
 
     min_vals[min_vals==0] = 1
-    if np.any(np.max(np.abs(min_vals),axis=0) < tol):
+    if np.any(np.min(np.abs(min_vals),axis=0) < tol):
         return False
     return True
 
@@ -667,7 +669,6 @@ def trim_coeffs(coeffs, approx_tol, solve_tol):
         mons = np.array(initial_mons).T
         slices = [mons[i] for i in range(dim)]
         slice_error = np.sum(np.abs(coeff[tuple(slices)]))
-
         if slice_error + error > approx_tol:
             all_triangular = False
         else:

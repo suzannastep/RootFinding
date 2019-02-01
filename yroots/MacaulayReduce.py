@@ -119,7 +119,7 @@ def rrqr_reduceMacaulay(matrix, matrix_terms, cuts, accuracy = 1.e-10):
     matrix_terms[cuts[0]:cuts[1]] = matrix_terms[cuts[0]:cuts[1]][P]
 
     #eliminate zero rows from the bottom of the matrix.
-#     matrix = row_swap_matrix(matrix)
+    matrix = row_swap_matrix(matrix)
     for row in matrix[::-1]:
         if np.allclose(row, 0,atol=accuracy):
             matrix = matrix[:-1]

@@ -199,7 +199,11 @@ class IntervalData:
         dim = 2
 
         #print the contours
+<<<<<<< HEAD
         contour_colors = ['#00cc00','#cc33ff']
+=======
+        contour_colors = ['#003cff','k'] #royal blue and black
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227
         x = np.linspace(self.a[0],self.b[0],1000)
         y = np.linspace(self.a[1],self.b[1],1000)
         X,Y = np.meshgrid(x,y)
@@ -213,8 +217,13 @@ class IntervalData:
                 plt.contour(X,Y,funcs[i](X,Y),levels=[0],colors=contour_colors[i])
 
         #Plot the zeros
+<<<<<<< HEAD
         plt.plot(np.real(zeros[:,0]), np.real(zeros[:,1]),'.',color='k',markersize=10,label='Roots')
         colors = ['w','#d3d3d3','#708090','#ffd480']
+=======
+        plt.plot(np.real(zeros[:,0]), np.real(zeros[:,1]),'o',color='none',markeredgecolor='r',markersize=10)
+        colors = ['w','#d3d3d3', '#708090', '#c5af7d', '#897A57', '#D6C7A4','#73e600','#ccff99']
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227
 
         if plot_intervals:
             plt.title('What happened to the intervals')
@@ -241,7 +250,11 @@ def extreme_val3(test_coeff, maxx = True):
     ''' Finds the extreme value of test_coeff on -1 to 1, used by quad_check
 
     test_coeff is [a,b,c] and represents the funciton a + bx + c(2x^2 - 1).
+<<<<<<< HEAD
     Basic calculus can be used to find the extreme values.
+=======
+    Basic calc can be used to find the extreme values.
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227
 
     Parameters
     ----------
@@ -281,7 +294,11 @@ def extreme_val4(test_coeff, maxx = True):
     ''' Finds the extreme value of test_coeff on -1 to 1, used by cubic_check
 
     test_coeff is [a,b,c,d] and represents the funciton a + bx + c(2x^2 - 1) + d*(4x^3 - 3x).
+<<<<<<< HEAD
     Basic calculus can be used to find the extreme values.
+=======
+    Basic calc can be used to find the extreme values.
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227
 
     Parameters
     ----------
@@ -960,8 +977,11 @@ def quadratic_check_nd(test_coeff, intervals,change_sign,tol):
             A = np.vstack([np.delete(C[var],var,0)]*(dim-1))
             np.fill_diagonal(A, 0)
             A += 4*np.diag(np.delete(C2,var,0))
+<<<<<<< HEAD
             if np.linalg.matrix_rank(A) < dim:
                 continue
+=======
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227
             #First Boundary
             x_var = interval[0][var]
             B = -np.delete(C[var],var,0)*x_var-np.delete(C1,var,0)
@@ -983,10 +1003,16 @@ def quadratic_check_nd(test_coeff, intervals,change_sign,tol):
         A = C.copy()
         A += 4*np.diag(C2)
         B = -C1.copy()
+<<<<<<< HEAD
         if np.linalg.matrix_rank(A) == dim:
             ext_spot = np.linalg.solve(A,B)
             if np.all(interval[0] < ext_spot) and np.all(interval[1] > ext_spot):
                 extreme_points.append(quad_poly(ext_spot))
+=======
+        ext_spot = np.linalg.solve(A,B)
+        if np.all(interval[0] < ext_spot) and np.all(interval[1] > ext_spot):
+            extreme_points.append(quad_poly(ext_spot))
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227
 
         extreme_points = np.array(extreme_points)
 

@@ -32,7 +32,11 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
     power = is_power(polys)
     dim = polys[0].dim
 
+<<<<<<< HEAD:yroots/Division.py
     matrix_degree = np.sum([poly.degree for poly in polys]) - len(polys) + 1
+=======
+    matrix_degree = np.sum(poly.degree for poly in polys) - len(polys) + 1
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227:yroots/Division.py
 
     poly_coeff_list = []
     for poly in polys:
@@ -54,9 +58,19 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
 
     if isinstance(matrix, int):
         return -1
+<<<<<<< HEAD:yroots/Division.py
 
     VB = matrix_terms[matrix.shape[0]:]
 
+=======
+
+    rows,columns = matrix.shape
+
+    VB = matrix_terms[matrix.shape[0]:]
+
+    matrix = np.hstack((np.eye(rows),solve_triangular(matrix[:,:rows],matrix[:,rows:])))
+
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227:yroots/Division.py
     if verbose:
         np.set_printoptions(suppress=True, linewidth=200)
         print("\nFinal Macaulay Matrix\n", matrix)
@@ -151,6 +165,7 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
     #conjugate because scipy gives the conjugate eigenvector
     vecs = vecs.conj()
 
+<<<<<<< HEAD:yroots/Division.py
     if len(vals) > len(np.unique(np.round(vals, 10))):
         return -1
 
@@ -158,6 +173,15 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
     sorted_vals2 = np.sort(np.abs(vals2)) #Sorted smallest to biggest
     if sorted_vals2[0] < sorted_vals2[-1]*tol:
         return -1
+=======
+    vals2, vecs2 = eig(vecs)
+    sorted_vals2 = np.sort(np.abs(vals2))
+    if sorted_vals2[0] < 1.e-15:
+        return -1
+    if sorted_vals2[0]/sorted_vals2[-1] < tol:
+        return -1
+
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227:yroots/Division.py
     if verbose:
         print("\nDivision Matrix\n", np.round(division_matrix[::-1,::-1], 2))
         print("\nLeft Eigenvectors (as rows)\n", vecs.T)
@@ -175,8 +199,11 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
         if  np.abs(vals[i]) < 1.e-3:
             continue
         root = np.zeros(dim, dtype=complex)
+<<<<<<< HEAD:yroots/Division.py
         if vecs[-1][i] == 0:
             print(vals,vecs[-1],sorted_vals2)
+=======
+>>>>>>> 92d2c6e1ee5f86af5765b1b5b69c6e6a57454227:yroots/Division.py
         for spot in range(0,divisor_var):
             root[spot] = vecs[-(2+spot)][i]/vecs[-1][i]
         for spot in range(divisor_var+1,dim):
