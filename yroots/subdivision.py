@@ -206,7 +206,7 @@ def get_cheb_grid(deg, dim, has_eval_grid):
         flatten = lambda x: x.flatten()
         return np.column_stack(map(flatten, cheb_grids))
 
-def interval_approximate_nd(f,a,b,deg,return_bools=False):
+def interval_approximate_nd(f,a,b,deg,return_bools=False,multiplier=None):
     """Finds the chebyshev approximation of an n-dimensional function on an interval.
 
     Parameters
@@ -264,6 +264,15 @@ def interval_approximate_nd(f,a,b,deg,return_bools=False):
 #                 change_sign[k] = False
 
     values = chebyshev_block_copy(values_block)
+
+    if multiplier is None:
+        if np.max(np.abs(values)) < 1.e-50:
+            multiplier = 1.e50
+        else:
+            multiplier = 1./np.max(np.abs(values))
+    multiplier = max(1, multiplier)
+    values *= multiplier
+
     coeffs = np.real(fftn(values/deg**dim))
 
     for i in range(dim):
@@ -280,9 +289,9 @@ def interval_approximate_nd(f,a,b,deg,return_bools=False):
 
     slices = [slice(0,deg+1)]*dim
     if return_bools:
-        return coeffs[tuple(slices)], change_sign
+        return coeffs[tuple(slices)], change_sign, multiplier
     else:
-        return coeffs[tuple(slices)]
+        return coeffs[tuple(slices)], multiplier
 
 def get_subintervals(a,b,dimensions,interval_data,polys,change_sign,approx_tol,check_subintervals=False):
     """Gets the subintervals to divide a search interval into.
@@ -334,7 +343,7 @@ def get_subintervals(a,b,dimensions,interval_data,polys,change_sign,approx_tol,c
     else:
         return subintervals
 
-def full_cheb_approximate(f,a,b,deg,tol=1.e-8,good_deg=None):
+def full_cheb_approximate(f,a,b,deg,tol,good_deg=None):
     """Gives the full chebyshev approximation and checks if it's good enough.
 
     Called recursively.
@@ -363,16 +372,25 @@ def full_cheb_approximate(f,a,b,deg,tol=1.e-8,good_deg=None):
     """
     #We know what degree we want
     if good_deg is not None:
-        coeff, bools = interval_approximate_nd(f,a,b,good_deg,return_bools=True)
-        clean_zeros_from_matrix(coeff,1.e-16)
+        coeff, bools, multiplier = interval_approximate_nd(f,a,b,good_deg,return_bools=True)
         return coeff, bools
     #Try degree deg and see if it's good enough
-    coeff = interval_approximate_nd(f,a,b,deg)
-    coeff2, bools = interval_approximate_nd(f,a,b,deg*2,return_bools=True)
+    coeff, multiplier = interval_approximate_nd(f,a,b,deg)
+    coeff2, bools, multiplier = interval_approximate_nd(f,a,b,deg*2,return_bools=True, multiplier=multiplier)
     coeff2[slice_top(coeff)] -= coeff
-    clean_zeros_from_matrix(coeff2,1.e-16)
     if np.sum(np.abs(coeff2)) > tol:
-        return None, None
+        #Find the directions to subdivide
+        dim = len(a)
+        div_dimensions = []
+        slices = [slice(0,None,None)]*dim
+        for d in range(dim):
+            slices[d] = slice(deg+1,None,None)
+            if np.sum(np.abs(coeff2[tuple(slices)])) > tol/dim:
+                div_dimensions.append(d)
+            slices[d] = slice(0,None,None)
+        if len(div_dimensions) == 0:
+            div_dimensions.append(0)
+        return None, np.array(div_dimensions)
     else:
         return coeff, bools
 
