@@ -62,11 +62,7 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
     power = is_power(polys)
     dim = polys[0].dim
 
-<<<<<<< HEAD
-    matrix_degree = np.sum(poly.degree for poly in polys) - len(polys) + 1
-=======
     matrix_degree = np.sum([poly.degree for poly in polys]) - len(polys) + 1
->>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
 
     poly_coeff_list = []
     for poly in polys:
@@ -88,7 +84,6 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
 
     if isinstance(matrix, int):
         return -1
-<<<<<<< HEAD
 
     rows,columns = matrix.shape
 
@@ -96,11 +91,6 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
 
     matrix = np.hstack((np.eye(rows),solve_triangular(matrix[:,:rows],matrix[:,rows:])))
 
-=======
-
-    VB = matrix_terms[matrix.shape[0]:]
-
->>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
     if verbose:
         np.set_printoptions(suppress=True, linewidth=200)
         print("\nFinal Macaulay Matrix\n", matrix)
@@ -202,11 +192,6 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
     sorted_vals2 = np.sort(np.abs(vals2)) #Sorted smallest to biggest
     if sorted_vals2[0] < sorted_vals2[-1]*tol:
         return -1
-<<<<<<< HEAD
-=======
-#     print(sorted_vals2[0]/sorted_vals2[-1])
-
->>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
     if verbose:
         print("\nDivision Matrix\n", np.round(division_matrix[::-1,::-1], 2))
         print("\nLeft Eigenvectors (as rows)\n", vecs.T)
