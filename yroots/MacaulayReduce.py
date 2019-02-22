@@ -126,9 +126,12 @@ def rrqr_reduceMacaulay(matrix, matrix_terms, cuts, accuracy = 1.e-10):
         else:
             break
 
+<<<<<<< HEAD
     #set very small values in the matrix to zero before backsolving
 #     matrix[np.isclose(matrix, 0, atol=accuracy)] = 0
 
+=======
+>>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
     #SVD conditioning check
     S = np.linalg.svd(matrix[:,:matrix.shape[0]], compute_uv=False)
     if S[0] * accuracy > S[-1]:
@@ -209,9 +212,6 @@ def rrqr_reduceMacaulay2(matrix, matrix_terms, cuts, accuracy = 1.e-10):
     matrix[:cuts[0],cuts[0]:cuts[1]] = B[:,P]
     matrix_terms[cuts[0]:cuts[1]] = matrix_terms[cuts[0]:cuts[1]][P]
     del P
-
-    #set small values in the matrix to zero now, after the QR reduction
-    matrix[np.isclose(matrix, 0, atol=accuracy)] = 0
 
     #eliminate zero rows from the bottom of the matrix.
     matrix = row_swap_matrix(matrix)

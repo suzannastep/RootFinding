@@ -90,6 +90,7 @@ def solve(funcs, a, b, plot = False, plot_intervals = False, polish = False):
         interval_data.print_results()
         #Plot what happened
         if plot and dim == 2:
+#             interval_data.print_results()
             interval_data.plot_results(funcs, zeros, plot_intervals)
         return zeros
 
@@ -163,6 +164,17 @@ def interval_approximate_1d(f,a,b,deg):
     """
     extrema = transform(np.cos((np.pi*np.arange(2*deg))/deg),a,b)
     values = f(extrema)
+
+    multiplier = None
+    if multiplier is None:
+        if np.max(np.abs(values)) < 1.e-50:
+            multiplier = 1.e50
+        else:
+            multiplier = 1./np.max(np.abs(values))
+    multiplier = max(1, multiplier)
+    values *= multiplier
+    print(values)
+
     coeffs = np.real(np.fft.fft(values/deg))
     coeffs[0]/=2
     coeffs[deg]/=2
@@ -412,7 +424,7 @@ def good_zeros_nd(zeros, imag_tol = 1.e-5, real_tol = 1.e-5):
     good_zeros : numpy array
         The real zeros in [-1,1] of the input zeros.
     """
-    good_zeros = zeros[np.all(np.abs(zeros.imag) < imag_tol,axis = 1)]
+    good_zeros = zeros[np.all(np.abs(zeros.imag) <= imag_tol,axis = 1)]
     good_zeros = good_zeros[np.all(np.abs(good_zeros) <= 1 + real_tol,axis = 1)]
     return good_zeros.real
 
@@ -449,7 +461,6 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
     cheb_approx_list = []
     interval_data.print_progress()
     dim = len(a)
-
     if good_degs is None:
         good_degs = [None]*len(funcs)
 
@@ -458,7 +469,8 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
 
         #Subdivides if a bad approximation
         if coeff is None:
-            intervals = get_subintervals(a,b,np.arange(dim),None,None,None,approx_tol)
+#             change_sign = np.arange(dim)
+            intervals = get_subintervals(a,b,change_sign,None,None,None,approx_tol)
             return np.vstack([subdivision_solve_nd(funcs,interval[0],interval[1],deg,interval_data,\
                                                    approx_tol,solve_tol,polish) for interval in intervals])
         else:
@@ -520,6 +532,7 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
             return polish_zeros(transform(good_zeros_nd(zero.reshape([1,dim])),a,b), funcs, polish_tol)
         else:
             return transform(good_zeros_nd(zero.reshape([1,dim])),a,b)
+    #Check if anything is linear
     elif np.any(np.array([coeff.shape[0] for coeff in coeffs]) == 2):
         #Subdivide but run some checks on the intervals first
         intervals = get_subintervals(a,b,np.arange(dim),interval_data,cheb_approx_list,change_sign,\
@@ -531,6 +544,8 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
             return np.vstack([subdivision_solve_nd(funcs,interval[0],interval[1],deg,interval_data,\
                                                    approx_tol,solve_tol,polish,good_degs) for interval in intervals])
 
+    if np.any(np.array([coeff.shape[0] for coeff in coeffs]) > 5):
+        divisor_var = -1
     if divisor_var < 0:
         #Subdivide but run some checks on the intervals first
         intervals = get_subintervals(a,b,np.arange(dim),interval_data,cheb_approx_list,\
@@ -564,7 +579,6 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-4,solve_tol=
             if isinstance(zeros, int):
                 divisor_var += 1
                 continue
-
             zeros = np.array(zeros)
             interval_data.track_interval("Division", [a,b])
             if len(zeros) == 0:

@@ -1,6 +1,7 @@
 import numpy as np
 import itertools
 from scipy.linalg import solve_triangular, eig, qr
+from yroots import LinearProjection
 from yroots.polynomial import MultiCheb, MultiPower, is_power
 from yroots.MacaulayReduce import add_polys, rrqr_reduceMacaulay, rrqr_reduceMacaulay2
 from yroots.utils import get_var_list, slice_top, row_swap_matrix, \
@@ -27,12 +28,45 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
     zeros : numpy array
         The common roots of the polynomials. Each row is a root.
     '''
+#     from matplotlib import pyplot as plt
+#     plt.figure(dpi=120)
+#     fig,ax = plt.subplots(1)
+#     fig.set_size_inches(10, 10)
+#     plt.xlim(-1, 1)
+#     plt.xlabel('$x$')
+#     plt.ylim(-1, 1)
+#     plt.ylabel('$y$')
+#     plt.title('Zero-Loci and Roots')
+#     dim = 2
+
+#     #print the contours
+#     contour_colors = ['#003cff','k'] #royal blue and black
+#     x = np.linspace(-1, 1, 100)
+#     y = np.linspace(-1, 1, 100)
+#     X,Y = np.meshgrid(x,y)
+#     for i in range(dim):
+#         Z = np.zeros_like(X)
+#         for spot,num in np.ndenumerate(X):
+#             Z[spot] = polys[i]([X[spot],Y[spot]])
+#         plt.contour(X,Y,Z,levels=[0],colors=contour_colors[i])
+#     plt.show()
+
+
+
     #This first section creates the Macaulay Matrix with the monomials that don't have
     #the divisor variable in the first columns.
+    polys, transform, is_projected = LinearProjection.remove_linear(polys, 1e-4, 1e-8)
+    if len(polys) == 1:
+        from yroots.OneDimension import solve
+        return transform(solve(polys[0], MSmatrix=0))
     power = is_power(polys)
     dim = polys[0].dim
 
+<<<<<<< HEAD
     matrix_degree = np.sum(poly.degree for poly in polys) - len(polys) + 1
+=======
+    matrix_degree = np.sum([poly.degree for poly in polys]) - len(polys) + 1
+>>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
 
     poly_coeff_list = []
     for poly in polys:
@@ -54,6 +88,7 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
 
     if isinstance(matrix, int):
         return -1
+<<<<<<< HEAD
 
     rows,columns = matrix.shape
 
@@ -61,6 +96,11 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
 
     matrix = np.hstack((np.eye(rows),solve_triangular(matrix[:,:rows],matrix[:,rows:])))
 
+=======
+
+    VB = matrix_terms[matrix.shape[0]:]
+
+>>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
     if verbose:
         np.set_printoptions(suppress=True, linewidth=200)
         print("\nFinal Macaulay Matrix\n", matrix)
@@ -162,6 +202,11 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
     sorted_vals2 = np.sort(np.abs(vals2)) #Sorted smallest to biggest
     if sorted_vals2[0] < sorted_vals2[-1]*tol:
         return -1
+<<<<<<< HEAD
+=======
+#     print(sorted_vals2[0]/sorted_vals2[-1])
+
+>>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
     if verbose:
         print("\nDivision Matrix\n", np.round(division_matrix[::-1,::-1], 2))
         print("\nLeft Eigenvectors (as rows)\n", vecs.T)
@@ -176,7 +221,7 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
         if power and abs(vecs[-1][i]) < 1.e-3:
             #This root has magnitude greater than 1, will possibly generate a false root due to instability
             continue
-        if  np.abs(vals[i]) < 1.e-3:
+        if  np.abs(vals[i]) < 1.e-5:
             continue
         root = np.zeros(dim, dtype=complex)
         for spot in range(0,divisor_var):
@@ -184,6 +229,7 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
         for spot in range(divisor_var+1,dim):
             root[spot] = vecs[-(1+spot)][i]/vecs[-1][i]
 
+#         print(1/vals[i], vecs[-2,i]/vecs[-1,i])
         root[divisor_var] = 1/vals[i]
 
         if polish:
@@ -197,10 +243,10 @@ def division(polys, divisor_var=0, tol=1.e-12, verbose=False, polish=False, retu
         zeros.append(root)
 
     if return_all_roots:
-        return np.array(zeros)
+        return transform(np.array(zeros))
     else:
         # only return roots in the unit complex hyperbox
-        zeros = np.array(zeros)
+        zeros = transform(np.array(zeros))
         return zeros[np.all(np.abs(zeros) <= 1,axis = 0)]
 
 def get_matrix_terms(poly_coeffs, dim, divisor_var):

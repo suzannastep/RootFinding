@@ -153,12 +153,21 @@ def test_subdivision_solve_with_transform():
     # This case works, but it's really slow
     # Case 5 - Three MultiPower 3D of degrees 3,4 and 5
     # choose a seed that has a zero like 1,3,5,11,13,16,24,28,31,32,33,41,42
+<<<<<<< HEAD
     # np.random.seed(1)
     # a = -2*np.ones(3);b = 2*np.ones(3)
     # A = getPoly(3,3,True)
     # B = getPoly(4,3,True)
     # C = getPoly(5,3,True)
     # correctZeros([A,B,C], a, b)
+=======
+    np.random.seed(1)
+    a = -2*np.ones(3);b = 2*np.ones(3)
+    A = getPoly(3,3,True)
+    B = getPoly(4,3,True)
+    C = getPoly(5,3,True)
+    correctZeros([A,B,C], a, b)
+>>>>>>> 50b4738d99cf8cd68e62fe355a69fc0346d90ce6
 
 def test_subdivision_solve_with_transform_1d():
     #Case 6 - One MultiPower 1D of degrees 10
