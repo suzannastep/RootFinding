@@ -144,8 +144,6 @@ def rrqr_reduceMacaulay2(matrix, matrix_terms, cuts, accuracy = 1.e-10):
     qr_multiply instead of qr and a multiplication
     to make the function faster and more memory efficient.
 
-    This function only works properly if the bottom left (D) part of the matrix is zero
-
     Parameters
     ----------
     matrix : numpy array.

@@ -45,7 +45,7 @@ def multiplication(polys, verbose=False, MSmatrix=0, return_all_roots=True):
     m_f, var_dict = MSMultMatrix(polys, poly_type, verbose=verbose, MSmatrix=MSmatrix)
 
     if verbose:
-        print("\nM_f:\n", m_f[::-1,::-1])
+        print("\nM_f:\n", m_f)
 
     # Get list of indexes of single variables and store vars that were not
     # in the vector space basis.
