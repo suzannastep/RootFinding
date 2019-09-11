@@ -3,13 +3,14 @@ import itertools
 from scipy.linalg import solve_triangular, eig
 from yroots import LinearProjection
 from yroots.polynomial import MultiCheb, MultiPower, is_power
-from yroots.MacaulayReduce import rrqr_reduceMacaulay2, rrqr_reduceMacaulay, find_degree, add_polys
+from yroots.MacaulayReduce import rrqr_reduceMacaulay2, rrqr_reduceMacaulay, find_degree, \
+                              add_polys
 from yroots.utils import row_swap_matrix, MacaulayError, slice_top, get_var_list, \
                               mon_combos, mon_combosHighest, sort_polys_by_degree, \
-                              deg_d_polys, all_permutations_cheb
+                              deg_d_polys, all_permutations_cheb, ConditioningError
 import warnings
 
-def multiplication(polys, verbose=False, MSmatrix=0, return_all_roots=True):
+def multiplication(polys, verbose=False, MSmatrix=0, return_all_roots=True, approx_tol = 1.e-4, solve_tol=1.e-8):
     '''
     Finds the roots of the given list of multidimensional polynomials using a multiplication matrix.
 
@@ -27,8 +28,11 @@ def multiplication(polys, verbose=False, MSmatrix=0, return_all_roots=True):
     -------
     roots : numpy array
         The common roots of the polynomials. Each row is a root.
+    Raises
+    ------
+    ConditioningError if MSMultMatrix(...) raises a ConditioningError.
     '''
-    polys, transform, is_projected = LinearProjection.remove_linear(polys, 1e-4, 1e-8)
+    polys, transform, is_projected = LinearProjection.remove_linear(polys, approx_tol, solve_tol)
     if len(polys) == 1:
         from yroots.OneDimension import solve
         return transform(solve(polys[0], MSmatrix=0))
@@ -42,7 +46,10 @@ def multiplication(polys, verbose=False, MSmatrix=0, return_all_roots=True):
     degrees = [poly.degree for poly in polys]
     max_number_of_roots = np.prod(degrees)
 
-    m_f, var_dict = MSMultMatrix(polys, poly_type, verbose=verbose, MSmatrix=MSmatrix)
+    try:
+        m_f, var_dict = MSMultMatrix(polys, poly_type, verbose=verbose, MSmatrix=MSmatrix)
+    except ConditioningError as e:
+        raise e
 
     if verbose:
         print("\nM_f:\n", m_f)
@@ -63,7 +70,7 @@ def multiplication(polys, verbose=False, MSmatrix=0, return_all_roots=True):
     zeros_spot = var_dict[tuple(0 for i in range(dim))]
 
     #throw out roots that were calculated unstably
-    vecs = vecs[:,np.abs(vecs[zeros_spot]) > 1.e-10]
+#     vecs = vecs[:,np.abs(vecs[zeros_spot]) > 1.e-10]
     if verbose:
         print('\nVariable Spots in the Vector\n',var_spots)
         print('\nEigeinvecs at the Variable Spots:\n',vecs[var_spots])
@@ -81,7 +88,7 @@ def multiplication(polys, verbose=False, MSmatrix=0, return_all_roots=True):
         # only return roots in the unit complex hyperbox
         return roots.T[np.all(np.abs(roots) <= 1,axis = 0)]
 
-def MSMultMatrix(polys, poly_type, verbose=False, MSmatrix=0):
+def MSMultMatrix(polys, poly_type, verbose=False, MSmatrix=0, tol=1.e-10):
     '''
     Finds the multiplication matrix using the reduced Macaulay matrix.
 
@@ -104,8 +111,15 @@ def MSMultMatrix(polys, poly_type, verbose=False, MSmatrix=0):
         The multiplication matrix for a random polynomial f
     var_dict : dictionary
         Maps each variable to its position in the vector space basis
+        
+    Raises
+    ------
+    ConditioningError if MacaulayReduction(...) raises a ConditioningError.
     '''
-    basisDict, VB = MacaulayReduction(polys, verbose=verbose)
+    try:
+        basisDict, VB = MacaulayReduction(polys, accuracy=tol, verbose=verbose)
+    except ConditioningError as e:
+        raise e
 
     dim = max(f.dim for f in polys)
 
@@ -153,7 +167,7 @@ def MSMultMatrix(polys, poly_type, verbose=False, MSmatrix=0):
 
     return mMatrix, var_dict
 
-def MacaulayReduction(initial_poly_list, accuracy = 1.e-10, verbose=False):
+def MacaulayReduction(initial_poly_list, accuracy = 0, verbose=False):
     """Reduces the Macaulay matrix to find a vector basis for the system of polynomials.
 
     Parameters
@@ -170,6 +184,10 @@ def MacaulayReduction(initial_poly_list, accuracy = 1.e-10, verbose=False):
         can be reduced to.
     VB : numpy array
         The terms in the vector basis, each row being a term.
+        
+    Raises
+    ------
+    ConditioningError if rrqr_reduceMacaulay(...) raises a ConditioningError.
     """
     power = is_power(initial_poly_list)
     dim = initial_poly_list[0].dim
@@ -187,11 +205,16 @@ def MacaulayReduction(initial_poly_list, accuracy = 1.e-10, verbose=False):
         print('\nColumns in Macaulay Matrix\nFirst element in tuple is degree of x, Second element is degree of y\n', matrix_terms)
         print('\nLocation of Cuts in the Macaulay Matrix into [ Mb | M1* | M2* ]\n', cuts)
 
-    #Should be combined into one function
-    if np.allclose(matrix[cuts[0]:,:cuts[0]], 0):
-        matrix, matrix_terms = rrqr_reduceMacaulay2(matrix, matrix_terms, cuts, accuracy = accuracy)
-    else:
+    try:
         matrix, matrix_terms = rrqr_reduceMacaulay(matrix, matrix_terms, cuts, accuracy = accuracy)
+    except ConditioningError as e:
+        raise e
+
+    # TODO: rrqr_reduceMacaulay2 is not working when expected.
+    # if np.allclose(matrix[cuts[0]:,:cuts[0]], 0):
+    #     matrix, matrix_terms = rrqr_reduceMacaulay2(matrix, matrix_terms, cuts, accuracy = accuracy)
+    # else:
+    #     matrix, matrix_terms = rrqr_reduceMacaulay(matrix, matrix_terms, cuts, accuracy = accuracy)
 
     if verbose:
         np.set_printoptions(suppress=True, linewidth=200)
@@ -344,9 +367,17 @@ def _random_poly(_type, dim):
 
     random_poly_shape = [2 for i in range(dim)]
 
-    random_poly_coeff = np.zeros(tuple(random_poly_shape), dtype=int)
-    for var in _vars:
-        random_poly_coeff[var] = np.random.randint(1000)
+    # random_poly_coeff = np.zeros(tuple(random_poly_shape), dtype=int)
+    # for var in _vars:
+    #     random_poly_coeff[var] = np.random.randint(1000)
+
+    random_poly_coeff = np.zeros(tuple(random_poly_shape), dtype=float)
+    #np.random.seed(42)
+
+    coeffs = np.random.rand(dim)
+    coeffs /= np.linalg.norm(coeffs)
+    for i,var in enumerate(_vars):
+        random_poly_coeff[var] = coeffs[i]
 
     if _type == 'MultiCheb':
         return MultiCheb(random_poly_coeff), _vars

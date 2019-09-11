@@ -73,7 +73,8 @@ class IntervalData:
         for check in self.subinterval_checks:
             self.interval_results[check.__name__] = []
         self.interval_results["Base Case"] = []
-        self.interval_results["Division"] = []
+        self.interval_results["Spectral"] = []
+        self.interval_results["Too Deep"] = []
         self.total_area = np.prod(self.b-self.a)
         self.current_area = 0.
         self.polishing = False
@@ -144,7 +145,7 @@ class IntervalData:
         Parameters
         ----------
         name : string
-            The name of the check or process (Division, Base Case) that solved this interval
+            The name of the check or process (Spectral, Base Case, Too Deep) that solved this interval
         interval: list
             [a,b] where a and b are the lower and upper bound of the interval to track.
         '''
@@ -171,10 +172,10 @@ class IntervalData:
         checkers = [name for name in self.interval_results]
         print("Total intervals checked was {}".format(total_intervals))
         print("Methods used were {}".format(checkers))
-        print("The percent solved by each was {}".format((100*results_numbers / total_intervals).round(2)))
+        print("The percent solved by each was {}".format((100*results_numbers / total_intervals).round(4)))
 
-    def plot_results(self, funcs, zeros, plot_intervals):
-        ''' Prints the results of subdivision solve. Only works if the funcitons are two dimensional.
+    def plot_results(self, funcs, zeros, plot_intervals, print_plot=True):
+        ''' Prints the results of subdivision solve. Only works if the functions are two dimensional.
 
         Parameters
         ----------
@@ -189,9 +190,9 @@ class IntervalData:
         #3D plot with small alpha, matplotlib interactive, animation
         #make logo
         #make easier to input lower/upper bounds as a list
-        plt.figure(dpi=1200)
+        plt.figure(dpi=600)
         fig,ax = plt.subplots(1)
-        fig.set_size_inches(10, 10)
+        fig.set_size_inches(6.5, 3)
         plt.xlim(self.a[0],self.b[0])
         plt.xlabel('$x$')
         plt.ylim(self.a[1],self.b[1])
@@ -201,7 +202,11 @@ class IntervalData:
         dim = 2
 
         #print the contours
+<<<<<<< HEAD
         contour_colors = ['#00cc00','#cc33ff']
+=======
+        contour_colors = ['#003cff','#50c878'] #royal blue and emerald green
+>>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
         x = np.linspace(self.a[0],self.b[0],1000)
         y = np.linspace(self.a[1],self.b[1],1000)
         X,Y = np.meshgrid(x,y)
@@ -214,12 +219,18 @@ class IntervalData:
             else:
                 plt.contour(X,Y,funcs[i](X,Y),levels=[0],colors=contour_colors[i])
 
+<<<<<<< HEAD
         #Plot the zeros
         plt.plot(np.real(zeros[:,0]), np.real(zeros[:,1]),'.',color='k',markersize=10,label='Roots')
         colors = ['w','#d3d3d3','#708090','#ffd480']
+=======
+        colors = ['w','#c3c3c3', 'C8', '#708090', '#897A57', '#D6C7A4','#73e600','#ccff99']
+        #colors = ['w','#d3d3d3', '#708090', '#c5af7d', '#897A57', '#D6C7A4','#73e600','#ccff99']
+>>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
 
         if plot_intervals:
-            plt.title('What happened to the intervals')
+            plt.title('')
+            #plt.title('What happened to the intervals')
             #plot results
             i = -1
             for check in self.interval_results:
@@ -230,13 +241,20 @@ class IntervalData:
                     a0,b0 = data
                     if first:
                         first = False
-                        rect = patches.Rectangle((a0[0],a0[1]),b0[0]-a0[0],b0[1]-a0[1],linewidth=.05,\
-                                                 edgecolor='k',facecolor=colors[i], label=check)
+                        rect = patches.Rectangle((a0[0],a0[1]),b0[0]-a0[0],b0[1]-a0[1],linewidth=.01,\
+                                                 edgecolor='#a6a6a6',facecolor=colors[i], label=check)
                     else:
-                        rect = patches.Rectangle((a0[0],a0[1]),b0[0]-a0[0],b0[1]-a0[1],linewidth=.05,\
-                                                 edgecolor='k',facecolor=colors[i])
+                        rect = patches.Rectangle((a0[0],a0[1]),b0[0]-a0[0],b0[1]-a0[1],linewidth=.01,\
+                                                 edgecolor='#a6a6a6',facecolor=colors[i])
                     ax.add_patch(rect)
             plt.legend()
+
+        #Plot the zeros
+        plt.plot(np.real(zeros[:,0]), np.real(zeros[:,1]),'o',color='#ffff00',markeredgecolor='#ffff00',markersize=3,
+                 zorder=22)
+
+        if print_plot:
+            plt.savefig('intervals.pdf', bbox_inches='tight')
         plt.show()
 
 def extreme_val3(test_coeff, maxx = True):
