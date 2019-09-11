@@ -111,7 +111,7 @@ def MSMultMatrix(polys, poly_type, verbose=False, MSmatrix=0, tol=1.e-10):
         The multiplication matrix for a random polynomial f
     var_dict : dictionary
         Maps each variable to its position in the vector space basis
-        
+
     Raises
     ------
     ConditioningError if MacaulayReduction(...) raises a ConditioningError.
@@ -184,7 +184,7 @@ def MacaulayReduction(initial_poly_list, accuracy = 0, verbose=False):
         can be reduced to.
     VB : numpy array
         The terms in the vector basis, each row being a term.
-        
+
     Raises
     ------
     ConditioningError if rrqr_reduceMacaulay(...) raises a ConditioningError.

@@ -94,7 +94,7 @@ def rrqr_reduceMacaulay(matrix, matrix_terms, cuts, accuracy = 1.e-10, return_pe
     '''
     #controller variables for each part of the matrix
     AD = matrix[:,:cuts[0]]
-    
+
     BCEF = matrix[:,cuts[0]:]
     # A = matrix[:cuts[0],:cuts[0]]
     B = matrix[:cuts[0],cuts[0]:cuts[1]]
@@ -131,29 +131,22 @@ def rrqr_reduceMacaulay(matrix, matrix_terms, cuts, accuracy = 1.e-10, return_pe
         else:
             break
 
-<<<<<<< HEAD
-    #SVD conditioning check
-    S = np.linalg.svd(matrix[:,:matrix.shape[0]], compute_uv=False)
-    if S[0] * accuracy > S[-1]:
-        return -1, -1
-=======
     #Conditioning check
     cond_num = np.linalg.cond(matrix[:,:matrix.shape[0]])
     if cond_num*accuracy > 1:
         raise ConditioningError("Conditioning number of the Macaulay matrix "\
                                 + "after QR is: " + str(cond_num))
 
->>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
     #backsolve
     height = matrix.shape[0]
     matrix[:,height:] = solve_triangular(matrix[:,:height],matrix[:,height:])
     matrix[:,:height] = np.eye(height)
-    
+
     if return_perm:
         perm = np.arange(matrix.shape[1])
         perm[cuts[0]:cuts[1]] = perm[cuts[0]:cuts[1]][P]
         return matrix, matrix_terms, perm
-        
+
     return matrix, matrix_terms
 
 def rrqr_reduceMacaulay2(matrix, matrix_terms, cuts, accuracy = 1.e-10):
@@ -238,18 +231,11 @@ def rrqr_reduceMacaulay2(matrix, matrix_terms, cuts, accuracy = 1.e-10):
         else:
             break
 
-<<<<<<< HEAD
-    #SVD conditioning check
-    S = np.linalg.svd(matrix[:,:matrix.shape[0]], compute_uv=False)
-    if S[0] * accuracy > S[-1]:
-        return -1, -1
-=======
     #Conditioning check
     cond_num = np.linalg.cond(matrix[:,:matrix.shape[0]])
     if cond_num*accuracy > 1:
         raise ConditioningError("Conditioning number of the Macaulay matrix "\
                                 + "after QR is: " + str(cond_num))
->>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
 
     #backsolve
     height = matrix.shape[0]

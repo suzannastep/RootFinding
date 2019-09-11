@@ -440,7 +440,7 @@ def good_zeros_nd(zeros, imag_tol = 1.e-5, real_tol = 1.e-5):
     good_zeros = good_zeros[np.all(np.abs(good_zeros) <= 1 + real_tol,axis = 1)]
     return good_zeros.real
 
-def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-5,solve_tol=1.e-8, polish=False, good_degs=None, level=0, max_level=20):
+def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-10,solve_tol=1.e-8, polish=False, good_degs=None, level=0, max_level=20):
     """Finds the common zeros of the given functions.
 
     Parameters

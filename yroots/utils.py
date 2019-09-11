@@ -14,7 +14,7 @@ class MacaulayError(np.linalg.LinAlgError):
 class ConditioningError(Exception):
     """Raised when the conditioning number of a matrix is not
     within the desired tolerance.
-    
+
     Attributes
     ----------
     message : str

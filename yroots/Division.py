@@ -224,18 +224,6 @@ def division(polys, divisor_var=0, tol=1.e-10, verbose=False, polish=False, retu
 #     if len(vals) > len(np.unique(np.round(vals, 10))):
 #         return -1
 
-<<<<<<< HEAD
-    vals2, vecs2 = eig(vecs)
-    sorted_vals2 = np.sort(np.abs(vals2)) #Sorted smallest to biggest
-    if sorted_vals2[0] < sorted_vals2[-1]*tol:
-        return -1
-    if verbose:
-        print("\nDivision Matrix\n", np.round(division_matrix[::-1,::-1], 2))
-        print("\nLeft Eigenvectors (as rows)\n", vecs.T)
-    if not power:
-        if np.max(np.abs(vals)) > 1.e6:
-            return -1
-=======
 #     eigenvalue_cond = np.linalg.cond(vecs)
 #     if eigenvalue_cond*tol > 1:
 #         return -1
@@ -246,7 +234,6 @@ def division(polys, divisor_var=0, tol=1.e-10, verbose=False, polish=False, retu
 #     if not power:
 #         if np.max(np.abs(vals)) > 1.e6:
 #             return -1
->>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
 
     #Calculates the zeros, the x values from the eigenvalues and the y values from the eigenvectors.
     zeros = list()
@@ -269,7 +256,7 @@ def division(polys, divisor_var=0, tol=1.e-10, verbose=False, polish=False, retu
 #         conditions = condeigv(division_matrix.T)
 #         if np.abs(vals[i]) > 1:
 #             print(root, conditions[i])
-                
+
         if polish:
             root = newton_polish(polys,root,tol = tol)
 

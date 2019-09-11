@@ -202,11 +202,7 @@ class IntervalData:
         dim = 2
 
         #print the contours
-<<<<<<< HEAD
-        contour_colors = ['#00cc00','#cc33ff']
-=======
         contour_colors = ['#003cff','#50c878'] #royal blue and emerald green
->>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
         x = np.linspace(self.a[0],self.b[0],1000)
         y = np.linspace(self.a[1],self.b[1],1000)
         X,Y = np.meshgrid(x,y)
@@ -219,14 +215,8 @@ class IntervalData:
             else:
                 plt.contour(X,Y,funcs[i](X,Y),levels=[0],colors=contour_colors[i])
 
-<<<<<<< HEAD
-        #Plot the zeros
-        plt.plot(np.real(zeros[:,0]), np.real(zeros[:,1]),'.',color='k',markersize=10,label='Roots')
-        colors = ['w','#d3d3d3','#708090','#ffd480']
-=======
         colors = ['w','#c3c3c3', 'C8', '#708090', '#897A57', '#D6C7A4','#73e600','#ccff99']
         #colors = ['w','#d3d3d3', '#708090', '#c5af7d', '#897A57', '#D6C7A4','#73e600','#ccff99']
->>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
 
         if plot_intervals:
             plt.title('')
