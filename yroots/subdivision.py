@@ -396,6 +396,10 @@ def full_cheb_approximate(f,a,b,deg,approx_tol,good_deg=None):
     coeff, multiplier = interval_approximate_nd(f,a,b,deg)
     coeff2, bools, multiplier = interval_approximate_nd(f,a,b,deg*2,return_bools=True, multiplier=multiplier)
     coeff2[slice_top(coeff)] -= coeff
+
+    #divide approxtol by 2
+    approx_tol /= 2
+
     if np.sum(np.abs(coeff2)) > approx_tol:
         #Find the directions to subdivide
         dim = len(a)
@@ -486,11 +490,6 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-5,solve_tol=
 
     for func, good_deg in zip(funcs, good_degs):
         coeff, change_sign = full_cheb_approximate(func,a,b,deg,approx_tol,good_deg)
-<<<<<<< HEAD
-
-=======
-#         print(change_sign)
->>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
         #Subdivides if a bad approximation
         if coeff is None:
 #             print("Bad Approx")
@@ -509,10 +508,6 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-5,solve_tol=
 
             cheb_approx_list.append(coeff)
 
-<<<<<<< HEAD
-=======
-#     print("Valid Approx")
->>>>>>> f4050f806e782d88870e1000cf3b50dd02bd3ba0
     #Make the system stable to solve
     coeffs, divisor_var = trim_coeffs(cheb_approx_list, approx_tol, solve_tol)
 
@@ -588,7 +583,7 @@ def subdivision_solve_nd(funcs,a,b,deg,interval_data,approx_tol=1.e-5,solve_tol=
                                                    for interval in intervals])
 
     polys = [MultiCheb(coeff, lead_term = [coeff.shape[0]-1], clean_zeros = False) for coeff in coeffs]
-    
+
     # zeros = division(polys,divisor_var,solve_tol)
     try:
         zeros = multiplication(polys, approx_tol=approx_tol, solve_tol=solve_tol)
@@ -694,7 +689,7 @@ def polish_zeros(zeros, funcs, tol=1.e-1):
     """
     import warnings
     warnings.warn("Polishing may return duplicate zeros.")
-    
+
     if len(zeros) == 0:
         return zeros
     dim = zeros.shape[1]
@@ -730,12 +725,13 @@ def trim_coeffs(coeffs, approx_tol, solve_tol):
         What direction to do the division in to be stable. -1 means we should subdivide.
     """
     all_triangular = True
+    approx_tol /= 2
     for num, coeff in enumerate(coeffs):
         error = 0.
         spot = np.abs(coeff) < 1.e-10*np.max(np.abs(coeff))
         error = np.sum(np.abs(coeff[spot]))
         coeff[spot] = 0
-        
+
         dim = coeff.ndim
         deg = np.sum(coeff.shape) - dim
         initial_mons = []
