@@ -331,22 +331,13 @@ def build_macaulay(initial_poly_list, max_cond_num, verbose=False):
             coeff = np.zeros([2]*dim)
             coeff[get_var_list(dim)] = row[:-1]
             coeff[tuple([0]*dim)] = row[-1]
-<<<<<<< HEAD
             if power:
                 poly = MultiPower(coeff)
             else:
                 poly = MultiCheb(coeff)
             poly_coeff_list = add_polys(degree, poly, poly_coeff_list)
     else: #no linear
-=======
-            if not ower:
-                poly = MultiCheb(coeff)
-            else:
-                poly = MultiPower(coeff)
-            poly_coeff_list = add_polys(degree, poly, poly_coeff_list)
-    else: #no linear
         A,Pc = None,None
->>>>>>> 56d70925259d265d6ed3090f9b38d0d3d99cf5c3
         varsToRemove = []
 
     #add nonlinear polys to poly_coeff_list
@@ -354,7 +345,6 @@ def build_macaulay(initial_poly_list, max_cond_num, verbose=False):
         poly_coeff_list = add_polys(degree, poly, poly_coeff_list)
 
     #Creates the matrix
-<<<<<<< HEAD
     matrix, matrix_terms, cuts = create_matrix(poly_coeff_list, degree, dim, varsToRemove)
 
     if verbose:
@@ -382,10 +372,7 @@ def build_macaulay(initial_poly_list, max_cond_num, verbose=False):
     VB = matrix_terms[matrix.shape[0]:]
     basisDict = makeBasisDict(matrix, matrix_terms, VB, power)
 
-    return basisDict, VB, varsToRemove
-=======
-    return (*create_matrix(poly_coeff_list, degree, dim, varsToRemove), A, Pc)
->>>>>>> 56d70925259d265d6ed3090f9b38d0d3d99cf5c3
+    return create_matrix(poly_coeff_list, degree, dim, varsToRemove)
 
 def makeBasisDict(matrix, matrix_terms, VB, power):
     '''Calculates and returns the basisDict.
@@ -511,7 +498,6 @@ def sorted_matrix_terms(degree, dim, varsToRemove):
     #trivial case
     if degree == 1:
         matrix_terms = np.reshape(xs_mons, (len(xs_mons),dim))
-<<<<<<< HEAD
         cuts = tuple([0,0])
     #normal case
     else:
@@ -525,21 +511,7 @@ def sorted_matrix_terms(degree, dim, varsToRemove):
         cuts = tuple([cuts[0] + np.sum(mask), cuts[1]+1])
 
     return matrix_terms, cuts
-=======
-        cuts = 0
-    #normal case
-    else:
-        matrix_terms = np.reshape(highest_mons+other_mons+xs_mons, (len(highest_mons+other_mons+xs_mons),dim))
-        cut = len(highest_mons)
 
-    # for var in varsToRemove:
-    #     B = matrix_terms[cuts[0]:]
-    #     mask = B[:,var] != 0
-    #     matrix_terms[cuts[0]:] = np.vstack([B[mask], B[~mask]])
-    #     cuts = tuple([cuts[0] + np.sum(mask), cuts[1]+1])
-
-    return matrix_terms, cut
->>>>>>> 56d70925259d265d6ed3090f9b38d0d3d99cf5c3
 
 def _random_poly(_type, dim):
     '''
