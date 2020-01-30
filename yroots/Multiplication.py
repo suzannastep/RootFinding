@@ -316,7 +316,7 @@ def build_macaulay(initial_poly_list, max_cond_num, verbose=False):
     degree = find_degree(initial_poly_list)
 
     linear_polys = [poly for poly in initial_poly_list if poly.degree == 1]
-    nonlinear_polys = [poly for poly in initial_poly_list if poly.degree != 1]
+    # nonlinear_polys = [poly for poly in initial_poly_list if poly.degree != 1]
     #Choose which variables to remove if things are linear, and add linear polys to matrix
     if len(linear_polys) == 1: #one linear
         varsToRemove = [np.argmax(np.abs(linear_polys[0].coeff[get_var_list(dim)]))]
@@ -325,23 +325,23 @@ def build_macaulay(initial_poly_list, max_cond_num, verbose=False):
         #get the row rededuced linear coefficients
         A,Pc = nullspace(linear_polys)
         varsToRemove = Pc[:len(A)].copy()
-        #add to macaulay matrix
-        for row in A:
-            #reconstruct a polynomial for each row
-            coeff = np.zeros([2]*dim)
-            coeff[get_var_list(dim)] = row[:-1]
-            coeff[tuple([0]*dim)] = row[-1]
-            if power:
-                poly = MultiPower(coeff)
-            else:
-                poly = MultiCheb(coeff)
-            poly_coeff_list = add_polys(degree, poly, poly_coeff_list)
+        # #add to macaulay matrix
+        # for row in A:
+        #     #reconstruct a polynomial for each row
+        #     coeff = np.zeros([2]*dim)
+        #     coeff[get_var_list(dim)] = row[:-1]
+        #     coeff[tuple([0]*dim)] = row[-1]
+        #     if power:
+        #         poly = MultiPower(coeff)
+        #     else:
+        #         poly = MultiCheb(coeff)
+        #     poly_coeff_list = add_polys(degree, poly, poly_coeff_list)
     else: #no linear
         A,Pc = None,None
         varsToRemove = []
 
     #add nonlinear polys to poly_coeff_list
-    for poly in nonlinear_polys:
+    for poly in initial_poly_list:
         poly_coeff_list = add_polys(degree, poly, poly_coeff_list)
 
     #Creates the matrix
